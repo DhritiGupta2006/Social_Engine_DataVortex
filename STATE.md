@@ -45,3 +45,42 @@ the corrected cleaned output, not the first (buggy) run.**
   `likes` holds up against ground truth, if the original source system is available.
 - Extend `05_insights.py` with per-language or per-location engagement breakdowns using
   `users_cleaned.csv` — not done here to keep scope tight and every claim verifiable.
+
+---
+
+## Phase 2 — SQL Implementation status
+
+Last updated: after Phase 2 full pipeline execution (06 → 07 → 08) this session.
+
+All three Phase 2 scripts were actually executed and their outputs verified.
+
+| Step | Script | Status | Output |
+|---|---|---|---|
+| Build DB | `src/06_build_sql_database.py` | ✅ ran, verified | `data/datavortex.db` (1,500 users, 12,000 posts) |
+| Run queries | `src/07_run_phase2_queries.py` | ✅ ran, verified | `reports/phase2/E3_*.md`, `M1_*.md`, `H2_*.md` |
+| Validate | `src/08_validate_phase2_results.py` | ✅ ran, **15/15 checks PASS** | `reports/phase2/phase2_validation.md` |
+
+### Phase 2 row counts (actual, not estimated)
+
+| Query | Rows returned | Note |
+|---|---|---|
+| E3 | 5 | One row per non-NULL platform; 1,784 NULL-platform posts excluded |
+| M1 | 33 | One row per distinct location; 12,000 total posts accounted for |
+| H2 | 99 | Top-3 per location × 33 locations; 0 rank-3 ties found |
+
+### Restrictions respected
+
+- `data/raw/` — not modified.
+- `data/cleaned/` — not modified.
+- `notebooks/` — not modified.
+- Phase 1 scripts (`01`–`05`) — not modified.
+- Phase 1 reports — not modified.
+- No imputation, no invented columns.
+- No PDFs, no screenshots.
+- SQLite only (`sqlite3` stdlib — no extra dependencies).
+
+### SQL files created
+
+- `sql/E3_platform_avg_engagement.sql`
+- `sql/M1_location_engagement.sql`
+- `sql/H2_rank_users_by_location.sql`

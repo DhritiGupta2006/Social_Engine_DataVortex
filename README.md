@@ -13,10 +13,15 @@ fresh by the pipeline.
 ```
 data/raw/          Original files, byte-for-byte untouched (checksum-verified)
 data/cleaned/       users_cleaned.csv, posts_cleaned.csv
-src/                01_audit → 02_clean → 03_validate → 04_eda → 05_insights (+ utils.py)
+data/datavortex.db  SQLite database built from cleaned CSVs (Phase 2)
+sql/                E3_platform_avg_engagement.sql, M1_location_engagement.sql, H2_rank_users_by_location.sql
+src/                01_audit → 02_clean → 03_validate → 04_eda → 05_insights (Phase 1, + utils.py)
+                    06_build_sql_database → 07_run_phase2_queries → 08_validate_phase2_results (Phase 2)
 notebooks/          DataVortex_Analysis.ipynb — one reproducible run of the full pipeline
 reports/            audit_report.md, cleaning_log.md, validation_report.md, insights.md
 reports/figures/    8 PNG charts referenced below
+reports/phase2/     E3_platform_avg_engagement.md, M1_location_engagement.md,
+                    H2_rank_users_by_location.md, phase2_validation.md
 README.md           this file
 STATE.md            current status / what's done
 ```
@@ -156,3 +161,64 @@ Full write-up with every underlying number: `reports/insights.md`. Headlines:
 - Brand/product extraction was explored during EDA but is not part of the final cleaned
   schema; it would need a more robust template parser than the regex used for
   exploration to be submission-grade.
+
+---
+
+## Phase 2 — SQL Implementation
+
+Phase 2 adds three SQL queries executed via Python `sqlite3` against `data/datavortex.db`,
+built from the Phase 1 cleaned CSVs. Phase 1 (Python/pandas) is unchanged.
+
+Global engagement definition: `COALESCE(likes, 0) + shares + comments`
+
+### How to reproduce Phase 2
+
+```bash
+python src/06_build_sql_database.py     # builds data/datavortex.db
+python src/07_run_phase2_queries.py     # runs E3, M1, H2; writes reports/phase2/*.md
+python src/08_validate_phase2_results.py # 15/15 checks PASS; writes reports/phase2/phase2_validation.md
+```
+
+### E3 — Average Engagement by Platform
+
+Query: `sql/E3_platform_avg_engagement.sql`  
+Report: `reports/phase2/E3_platform_avg_engagement.md`
+
+| platform | post_count | avg_likes | avg_shares | avg_comments | avg_total_engagement |
+|---|---|---|---|---|---|
+| Instagram | 1,989 | 2,500.93 | 1,040.84 | 499.80 | 3,669.38 |
+| Reddit | 2,031 | 2,488.11 | 1,002.23 | 511.18 | 3,647.47 |
+| YouTube | 2,073 | 2,517.77 | 1,011.83 | 504.38 | 3,638.03 |
+| Facebook | 2,074 | 2,528.86 | 984.17 | 506.94 | 3,631.00 |
+| Twitter | 2,049 | 2,437.69 | 1,005.39 | 506.13 | 3,563.75 |
+
+NULL-platform rows (1,784) excluded. Spread between highest and lowest platform:
+**~3.0%** — consistent with Phase 1 Insight #2 (platform is a weak differentiator).
+
+### M1 — Which Locations Generate the Most Engagement
+
+Query: `sql/M1_location_engagement.sql`  
+Report: `reports/phase2/M1_location_engagement.md`
+
+33 distinct locations, 12,000 total posts. Top 5:
+
+| location | post_count | total_engagement | avg_per_post |
+|---|---|---|---|
+| Los Angeles, USA | 459 | 1,691,398 | 3,685.0 |
+| Munich, Germany | 452 | 1,654,881 | 3,661.2 |
+| Shanghai, China | 451 | 1,623,667 | 3,600.1 |
+| Barcelona, Spain | 439 | 1,620,828 | 3,692.1 |
+| Dubai, UAE | 421 | 1,532,010 | 3,639.0 |
+
+### H2 — Rank Users Within Their Location
+
+Query: `sql/H2_rank_users_by_location.sql`  
+Report: `reports/phase2/H2_rank_users_by_location.md`
+
+99 rows across 33 locations (top-3 per location via `RANK()`). No rank-3 ties found.
+Users with zero posts are excluded by the INNER JOIN (none expected — 100% user_id resolution
+confirmed in Phase 1 validation).
+
+### Phase 2 Validation
+
+15/15 independent pandas checks PASS. Full report: `reports/phase2/phase2_validation.md`.
