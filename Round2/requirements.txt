@@ -1,0 +1,8 @@
+# DATA VORTEX A'26 — Round 2 Dependencies
+# Python 3.10.11 (verified on this version)
+# Pin exact versions used during development and evaluation.
+
+scikit-learn==1.4.2
+pandas==2.2.2
+numpy==1.26.4
+matplotlib==3.8.2
