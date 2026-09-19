@@ -1,0 +1,13 @@
+{
+  "sentiment_label": {
+    "Negative": 0,
+    "Neutral": 1,
+    "Positive": 2
+  },
+  "topic_category": {
+    "Account_Security": 0,
+    "Community_Discussion": 1,
+    "Feature_Feedback": 2,
+    "Technical_Issues": 3
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "final_model_run_id": "Exp-D",
+  "config_description": "char(3,5)+LinearSVC C=1.0",
+  "val_accuracy": 0.6015,
+  "val_macro_F1": 0.6011,
+  "random_seed": 42,
+  "trained_on": "train+val combined (7654 rows)",
+  "sentiment_classes": [
+    "Negative",
+    "Neutral",
+    "Positive"
+  ],
+  "model_pkl": "models/final_sentiment_model.pkl",
+  "label_encoders_json": "artifacts/label_encoders.json"
+}
