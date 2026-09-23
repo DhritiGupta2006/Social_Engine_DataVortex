@@ -1,0 +1,15 @@
+# Credentials — never commit
+Round3/.env
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Scratch / temp
+Round3/scratch/*.log
+
+# OS
+.DS_Store
+Thumbs.db
